@@ -33,10 +33,17 @@ export async function GET(request: NextRequest) {
     error
   } = await supabase.auth.getSession()
 
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser()
+
   // Log toàn bộ cookies nhận được
   console.log('Cookies received:', request.cookies.getAll())
-  console.log('User:', session?.user.email ?? null)
+  console.log('Session:', session)
+  console.log('User:', user)
   console.log('Error:', error?.message ?? null)
+  console.log('User Error:', userError?.message ?? null)
 
   console.log(
     'Authorize route hit, client_id:',
