@@ -1,4 +1,4 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -32,6 +32,17 @@ export async function GET(request: NextRequest) {
     data: { user }
   } = await supabase.auth.getUser()
 
+  console.log(
+    'Authorize route hit, client_id:',
+    clientId,
+    'redirect_uri:',
+    redirectUri,
+    'state:',
+    state,
+    'user:',
+    user
+  )
+
   if (user) {
     const url = new URL('/complete-sso', request.url)
     url.searchParams.set('client_id', clientId)
@@ -40,7 +51,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // --- Chưa login → redirect sang /login, giữ params lại ---
   const loginUrl = new URL('/login', request.url)
   loginUrl.searchParams.set('client_id', clientId)
   loginUrl.searchParams.set('redirect_uri', redirectUri)

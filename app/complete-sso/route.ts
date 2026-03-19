@@ -18,6 +18,17 @@ export async function GET(request: NextRequest) {
     error: userError
   } = await supabase.auth.getUser()
 
+  console.log(
+    'Complete SSO route hit, client_id:',
+    clientId,
+    'redirect_uri:',
+    redirectUri,
+    'state:',
+    state,
+    'user:',
+    user
+  )
+
   if (userError || !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('client_id', clientId)
