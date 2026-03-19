@@ -29,13 +29,13 @@ export async function GET(request: NextRequest) {
   }
 
   const {
-    data: { user },
+    data: { session },
     error
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getSession()
 
   // Log toàn bộ cookies nhận được
   console.log('Cookies received:', request.cookies.getAll())
-  console.log('User:', user?.email ?? null)
+  console.log('User:', session?.user.email ?? null)
   console.log('Error:', error?.message ?? null)
 
   console.log(
@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
     'state:',
     state,
     'user:',
-    user
+    session?.user.email ?? null
   )
 
-  if (user) {
+  if (session?.user) {
     const url = new URL('/complete-sso', request.url)
     url.searchParams.set('client_id', clientId)
     url.searchParams.set('redirect_uri', redirectUri)
