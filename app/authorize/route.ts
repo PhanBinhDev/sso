@@ -1,4 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/server'
+// app/authorize/route.ts
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -15,8 +16,8 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const supabase = createAdminClient()
-  const { data: client } = await supabase
+  const admin = createAdminClient()
+  const { data: client } = await admin
     .schema('sso')
     .from('clients')
     .select('client_id, redirect_uris, is_active')
@@ -28,33 +29,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid client' }, { status: 401 })
   }
 
+  // Dùng createClient để check session — đọc cookie đúng cách
+  const supabase = await createClient()
   const {
-    data: { session },
-    error
+    data: { session }
   } = await supabase.auth.getSession()
 
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser()
-
-  // Log toàn bộ cookies nhận được
-  console.log('Cookies received:', request.cookies.getAll())
-  console.log('Session:', session)
-  console.log('User:', user)
-  console.log('Error:', error?.message ?? null)
-  console.log('User Error:', userError?.message ?? null)
-
-  console.log(
-    'Authorize route hit, client_id:',
-    clientId,
-    'redirect_uri:',
-    redirectUri,
-    'state:',
-    state,
-    'user:',
-    session?.user.email ?? null
-  )
+  console.log('Authorize - user:', session?.user?.email ?? null)
 
   if (session?.user) {
     const url = new URL('/complete-sso', request.url)
@@ -68,6 +49,5 @@ export async function GET(request: NextRequest) {
   loginUrl.searchParams.set('client_id', clientId)
   loginUrl.searchParams.set('redirect_uri', redirectUri)
   if (state) loginUrl.searchParams.set('state', state)
-
   return NextResponse.redirect(loginUrl)
 }
