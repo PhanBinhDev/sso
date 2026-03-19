@@ -13,7 +13,11 @@ export async function createClient() {
         getAll: () => cookieStore.getAll(),
         setAll: (cookiesToSet) => {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
+            cookieStore.set(name, value, {
+              ...options,
+              sameSite: 'none',
+              secure: true
+            })
           )
         }
       }
